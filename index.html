@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101116"><meta name="description" content="Track your monthly student budget and see where your money goes."><title>SpendWise | Student Budget Tracker</title><link rel="icon" href="logo.png"><script>
+try {
+  if (localStorage.getItem('spendwise-theme') === 'light') {
+    document.documentElement.dataset.theme = 'light';
+  }
+} catch {
+  // The default theme is available without browser storage.
+}
+</script><link rel="stylesheet" href="style.css"><script src="app.js" defer></script></head>
+<body>
+<a class="skip" href="#main">Skip to dashboard</a>
+<header class="top"><div class="wrap mast"><a href="./" class="brand"><span class="logo"><img src="logo.png" alt=""></span>Spend<span>Wise</span></a><span class="tag">Student Budget Tracker</span><nav class="dashboard-nav" aria-label="Dashboard sections">
+<a href="#overview">Overview</a>
+<a href="#bills">Bills<span id="bills-due" hidden></span></a>
+<a href="#expenses">Expenses</a>
+</nav><div class="header-actions"><button type="button" class="primary" id="add"><span aria-hidden="true">＋</span> Add expense</button>
+<button type="button" id="theme-toggle" aria-label="Switch to light mode" title="Switch to light mode">
+<svg class="theme-sun" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></svg>
+<svg class="theme-moon" aria-hidden="true" viewBox="0 0 24 24"><path d="M20.9 13.35A9 9 0 0 1 10.65 3.1 9 9 0 1 0 20.9 13.35Z"/></svg>
+</button></div></div></header>
+<main class="wrap" id="main">
+<div class="intro"><div><h1>Budget dashboard</h1><p>Plan your month and see where your money goes.</p></div><div class="actions"><label for="month" class="sr">Budget month</label><input type="month" id="month" required><button id="demo-toggle" type="button">Try demo</button></div></div>
+<p id="demo-banner" hidden>Demo mode · Sample data. Changes reset when you exit or reload.</p>
+<section class="panel reminders" id="bills" tabindex="-1" aria-labelledby="reminders-title"><div class="panel-art" data-art="reminders" aria-hidden="true"></div>
+<div class="section-head"><h2 id="reminders-title">Payment reminders</h2><button id="add-reminder" type="button">Add reminder</button></div>
+<div id="reminder-list"></div><div id="payment-undo" class="payment-undo" hidden><span id="undo-description" class="muted"></span><button id="undo-payment" type="button">Undo payment</button></div>
+</section>
+<section class="summary" id="overview" tabindex="-1" aria-label="Monthly budget summary">
+<article class="panel metric"><div class="panel-art" data-art="monthly-budget" aria-hidden="true"></div><div><span class="symbol blue" aria-hidden="true">◎</span><h2>Monthly budget</h2></div><strong id="budget"></strong><button class="link" id="set-budget">Set budget</button></article>
+<article class="panel metric"><div class="panel-art" data-art="total-spent" aria-hidden="true"></div><div><span class="symbol violet" aria-hidden="true">↗</span><h2>Total spent</h2></div><strong id="spent"></strong><span class="muted" id="count"></span></article>
+<article class="panel metric balance"><div class="panel-art" data-art="remaining" aria-hidden="true"></div><div><span class="symbol mint" aria-hidden="true">↘</span><h2 id="balance-title">Remaining budget</h2></div><strong id="remaining"></strong><span class="muted" id="balance-note"></span></article>
+<article class="panel metric balance"><div class="panel-art" data-art="upcoming-bills" aria-hidden="true"></div><div><h2 id="forecast-title">Left after upcoming bills</h2></div><strong id="forecast"></strong><span class="muted" id="forecast-note"></span></article>
+</section>
+<div id="budget-copy" class="panel budget-copy" hidden>
+<p class="muted" id="budget-copy-note"></p>
+<button type="button" id="copy-budget">Copy last month’s budget</button>
+</div>
+<section class="details" aria-label="Spending breakdown">
+<article class="panel usage"><div class="panel-art" data-art="budget-usage" aria-hidden="true"></div><div class="section-head"><h2>Budget usage</h2><span id="percent"></span></div><progress id="usage" max="100" value="0" aria-label="Monthly budget used"></progress><p id="usage-note" class="muted"></p></article>
+<article class="panel categories"><div class="panel-art" data-art="categories" aria-hidden="true"></div><div class="section-head"><h2>Spending by category</h2></div><p class="muted" id="top-category"></p><div id="chart"></div></article>
+</section>
+<section class="panel spending-trend" aria-labelledby="trend-title">
+<div class="section-head"><h2 id="trend-title">Six-month spending trend</h2></div>
+<p class="muted" id="trend-comparison"></p>
+<ol id="trend-chart" aria-label="Monthly expense totals"></ol>
+</section>
+<section class="panel category-budgets" aria-labelledby="limits-title"><div class="panel-art" data-art="category-budgets" aria-hidden="true"></div>
+<div class="section-head"><h2 id="limits-title">Category budgets</h2><button id="set-limit" type="button">Set category limit</button></div>
+<div id="category-limits"></div>
+</section>
+<section class="panel transactions" id="expenses" tabindex="-1"><div class="panel-art" data-art="expenses" aria-hidden="true"></div><div class="section-head"><h2>Expenses</h2><div class="expense-tools"><span class="muted" id="expenses-month"></span><button type="button" id="export-csv" title="Export all expenses for the selected month">Export CSV</button></div></div><div class="expense-filters">
+<label>Search expenses<input id="expense-search" type="search" placeholder="Search by name"></label>
+<label>Filter by category<select id="expense-category"><option value="">All categories</option></select></label>
+</div><div id="expense-undo" class="payment-undo expense-undo" hidden><span id="expense-undo-note" class="muted"></span><button type="button" id="undo-expense">Undo expense removal</button></div>
+<div id="expense-list"></div></section>
+<p class="foot">CAD · Saved in this browser</p>
+</main>
+<div id="feedback" role="status" aria-live="polite"></div>
+<dialog id="editor" aria-labelledby="form-title"><form id="edit-form"><h2 id="form-title"></h2><p id="form-note" class="muted"></p>
+<div id="expense-fields"><label>Description<input name="description" maxlength="80" required placeholder="e.g. Groceries"></label><div class="form-grid"><label>Category<select name="category" required></select></label><label>Date<input name="date" type="date" required></label></div></div>
+<label id="amount-label"><span id="amount-caption"></span><input name="amount" type="number" inputmode="decimal" min="0.01" max="999999.99" step="0.01" required placeholder="0.00"></label>
+<p id="form-error" role="alert"></p><div class="dialog-actions"><button type="button" id="cancel">Cancel</button><button class="primary" id="save">Save</button></div></form></dialog>
+<dialog id="limit-editor" aria-labelledby="limit-title">
+<form id="limit-form">
+<h2 id="limit-title">Set category limit</h2>
+<p id="limit-month" class="muted"></p>
+<label>Category<select name="category" required></select></label>
+<label>Monthly limit (CAD)<input name="limit" type="number" inputmode="decimal" min="0.01" max="999999.99" step="0.01" required></label>
+<p id="limit-error" role="alert"></p>
+<div class="dialog-actions">
+<button id="remove-limit" type="button" hidden>Remove limit</button>
+<button id="cancel-limit" type="button">Cancel</button>
+<button class="primary">Save limit</button>
+</div>
+</form>
+</dialog>
+<dialog id="reminder-editor" aria-labelledby="reminder-editor-title">
+<form id="reminder-form">
+<h2 id="reminder-editor-title">Add monthly reminder</h2>
+<label>Payment name<input name="description" maxlength="80" required placeholder="e.g. Rent"></label>
+<div class="form-grid">
+<label>Category<select name="category" required></select></label>
+<label>Amount (CAD)<input name="amount" type="number" inputmode="decimal" min="0.01" max="999999.99" step="0.01" required></label>
+</div>
+<label>Next due date<input name="date" type="date" aria-describedby="repeat-note" required></label>
+<p id="repeat-note" class="muted">Repeats monthly. If a month is shorter, payment is due on its last day.</p>
+<p class="reminder-error" id="reminder-form-error" role="alert"></p>
+<div class="dialog-actions"><button type="button" id="cancel-reminder">Cancel</button><button class="primary">Save reminder</button></div>
+</form>
+</dialog>
+<dialog id="payment-details" aria-labelledby="payment-name">
+<h2 id="payment-name"></h2>
+<p id="payment-status"></p>
+<dl class="payment-facts">
+<dt>Amount</dt><dd id="payment-amount"></dd>
+<dt>Category</dt><dd id="payment-category"></dd>
+<dt>Due date</dt><dd id="payment-date"></dd>
+<dt>Repeats</dt><dd id="payment-repeat"></dd>
+</dl>
+<p id="payment-note" class="muted"></p>
+<form id="pay-form"><label>Actual amount paid (CAD, optional)<input name="actual" type="number" inputmode="decimal" min="0.01" max="999999.99" step="0.01"></label></form>
+<p class="reminder-error" id="payment-error" role="alert"></p>
+<div class="dialog-actions payment-actions"><button type="button" id="close-payment">Close</button><button type="button" id="edit-reminder">Edit reminder</button><button type="submit" form="pay-form" class="primary" id="mark-paid">Mark as paid</button></div>
+<button type="button" id="stop-reminder" class="link danger-link">Stop reminder</button>
+</dialog>
+<dialog id="stop-dialog" aria-labelledby="stop-title">
+<h2 id="stop-title">Stop this reminder?</h2>
+<p class="muted">Past payments stay in Expenses.</p>
+<p id="stop-error" class="reminder-error" role="alert"></p>
+<div class="dialog-actions"><button type="button" id="cancel-stop">Cancel</button><button type="button" id="confirm-stop">Stop reminder</button></div>
+</dialog>
+</body></html>
